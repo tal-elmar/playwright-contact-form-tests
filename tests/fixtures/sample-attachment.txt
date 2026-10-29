@@ -1,0 +1,1 @@
+Sample attachment used by the contact form tests.
