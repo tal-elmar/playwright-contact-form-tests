@@ -32,19 +32,37 @@ Other useful commands:
 | `npm run test:ui` | Opens Playwright's interactive UI mode |
 | `npm run typecheck` | Checks the TypeScript without running tests |
 
+## Project structure
+
+```
+playwright-form-tests/
+├── tests/
+│   ├── contact-form.spec.ts              # happy-path tests
+│   ├── contact-form-edge-cases.spec.ts   # invalid and unusual input
+│   └── fixtures/sample-attachment.txt    # file used by the upload test
+├── playwright.config.ts
+└── package.json
+```
+
 ## What's covered
 
-| Area | Test | Status |
+| Spec | Test | Status |
 | --- | --- | --- |
-| Contact form | Form and all its fields are shown | ✅ |
-| Contact form | Filled form submits and shows a success message | ✅ |
-| Contact form | Form submits with a file attached | ✅ |
-| Validation | Empty fields, invalid email, long input | Planned |
+| `contact-form` | Form and all its fields are shown | ✅ |
+| `contact-form` | Filled form submits and shows a success message | ✅ |
+| `contact-form` | Form submits with a file attached | ✅ |
+| `contact-form-edge-cases` | Empty form is blocked (only the email field is required on this site) | ✅ |
+| `contact-form-edge-cases` | Invalid email formats are blocked (4 cases) | ✅ |
+| `contact-form-edge-cases` | Very long message (5,000 characters) is accepted | ✅ |
+| `contact-form-edge-cases` | Special characters in all fields are accepted | ✅ |
 | Accessibility | axe-core scan of the form page | Planned |
 
 ## How the tests are written
 
 - Locators use Playwright's user-facing queries (`getByRole`, `getByPlaceholder`) instead of fragile CSS paths.
+- Browser validation messages ("Please fill out this field") are not page text, so those tests read the field's validity state with `checkValidity()`.
+- The site shows a cookie consent overlay that can block clicks. A locator handler (`page.addLocatorHandler`) in each `beforeEach` clicks "Consent" whenever it gets in the way.
+- Repeated cases (invalid emails) are generated from a list with a `for` loop, so each one is a separate test in the report.
 - No hard waits. Playwright waits automatically, and `expect` assertions retry until the page is ready.
 - One exception: the file upload uses the CSS locator `input[type="file"]`, because that input has no label, placeholder or role to target.
 
@@ -52,8 +70,8 @@ Other useful commands:
 
 The repo grows in small stages, one or more commits each:
 
-1. **Basics** (this commit): Playwright + TypeScript, happy-path tests.
-2. **Negative cases**: empty required fields, invalid email, very long input.
+1. **Basics** (done): Playwright + TypeScript, happy-path tests.
+2. **Edge cases** (done): empty required field, invalid email, very long input, special characters.
 3. **Page Object Model**: move locators into page classes and test data into its own file.
 4. **Cross-browser**: Firefox, WebKit and a mobile viewport.
 5. **Accessibility**: `@axe-core/playwright` scans of the form pages.
