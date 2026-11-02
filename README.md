@@ -10,7 +10,7 @@ All tests run against the page [Automation Exercise](https://automationexercise.
 
 ## How to run
 
-Requires [Node.js](https://nodejs.org) 20 or newer.
+Requires [Node.js](https://nodejs.org) 20.19 or newer.
 
 ```bash
 npm install
@@ -36,6 +36,10 @@ Other useful commands:
 
 ```
 playwright-form-tests/
+├── pages/
+│   └── contact-page.ts                   # page object: locators and actions for the form
+├── test-data/
+│   └── contact-data.ts                   # valid data (faker) and fixed invalid/unusual data
 ├── tests/
 │   ├── contact-form.spec.ts              # happy-path tests
 │   ├── contact-form-edge-cases.spec.ts   # invalid and unusual input
@@ -59,9 +63,11 @@ playwright-form-tests/
 
 ## How the tests are written
 
+- **Page Object Model.** `ContactPage` holds every locator and action for the form (`open`, `fillForm`, `submit`, ...). The specs only describe what to check, so if the page changes, the fix goes in one file. All `expect` calls stay in the specs.
+- **Test data in its own file.** Valid data is random on every run, made with [Faker](https://fakerjs.dev), and emails always use the test domain `example.com`. Invalid emails and special-character strings are fixed, so a failure is easy to reproduce.
 - Locators use Playwright's user-facing queries (`getByRole`, `getByPlaceholder`) instead of fragile CSS paths.
 - Browser validation messages ("Please fill out this field") are not page text, so those tests read the field's validity state with `checkValidity()`.
-- The site shows a cookie consent overlay that can block clicks. A locator handler (`page.addLocatorHandler`) in each `beforeEach` clicks "Consent" whenever it gets in the way.
+- The site shows a cookie consent overlay that can block clicks. A locator handler (`page.addLocatorHandler`), set up in `ContactPage.open()`, clicks "Consent" whenever it gets in the way.
 - Repeated cases (invalid emails) are generated from a list with a `for` loop, so each one is a separate test in the report.
 - No hard waits. Playwright waits automatically, and `expect` assertions retry until the page is ready.
 - One exception: the file upload uses the CSS locator `input[type="file"]`, because that input has no label, placeholder or role to target.
@@ -72,7 +78,7 @@ The repo grows in small stages, one or more commits each:
 
 1. **Basics** (done): Playwright + TypeScript, happy-path tests.
 2. **Edge cases** (done): empty required field, invalid email, very long input, special characters.
-3. **Page Object Model**: move locators into page classes and test data into its own file.
+3. **Page Object Model** (done): move locators into page classes and test data into its own file.
 4. **Cross-browser**: Firefox, WebKit and a mobile viewport.
 5. **Accessibility**: `@axe-core/playwright` scans of the form pages.
 6. **CI**: GitHub Actions on every push, with the HTML report uploaded and a status badge here.
