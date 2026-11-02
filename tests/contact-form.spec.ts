@@ -1,57 +1,40 @@
 import { test, expect } from '@playwright/test';
+import { ContactPage } from '../pages/contact-page';
+import { validContact } from '../test-data/contact-data';
 
 // Practice site built for automation training: https://automationexercise.com/contact_us
-// The form fields have no <label> elements, so they are located by their placeholder text.
-
-const SUCCESS_MESSAGE = 'Success! Your details have been submitted successfully.';
+// Locators and actions live in pages/contact-page.ts, test data in test-data/contact-data.ts.
 
 test.describe('Contact form Happy Path', () => {
+  let contactPage: ContactPage;
+
   test.beforeEach(async ({ page }) => {
-    //clicking on the consent dialogue window that blocks the web page
-    await page.addLocatorHandler(page.getByRole('button', { name: 'Consent' }), async (button) => {
-      await button.click();
-    });
-    await page.goto('/contact_us');
+    contactPage = new ContactPage(page);
+    // opens the page and sets up the click on the consent dialogue window
+    await contactPage.open();
   });
 
-  test('checks the form is fully visible', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Get In Touch' })).toBeVisible();
-    await expect(page.getByPlaceholder('Name', { exact: true })).toBeVisible();
-    await expect(page.getByPlaceholder('Email', { exact: true })).toBeVisible();
-    await expect(page.getByPlaceholder('Subject')).toBeVisible();
-    await expect(page.getByPlaceholder('Your Message Here')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Submit' })).toBeEnabled();
+  test('checks the form is fully visible', async () => {
+    await expect(contactPage.heading).toBeVisible();
+    for (const field of Object.values(contactPage.fields)) {
+      await expect(field).toBeVisible();
+    }
+    await expect(contactPage.submitButton).toBeEnabled();
   });
 
-  test('submit the form and show a success message', async ({ page }) => {
-    await page.getByPlaceholder('Name', { exact: true }).fill('Test User');
-    await page.getByPlaceholder('Email', { exact: true }).fill('test.user@example.com');
-    await page.getByPlaceholder('Subject').fill('Question about an order');
-    await page.getByPlaceholder('Your Message Here').fill('Hello, this is an automated test message.');
+  test('submit the form and show a success message', async () => {
+    await contactPage.fillForm(validContact());
+    // submit() also accepts the "Press OK to proceed!" browser dialog
+    await contactPage.submit();
 
-    // The site asks "Press OK to proceed!" in a browser dialog before submitting.
-    page.on('dialog', dialog => {
-      dialog.accept()
-    });
-    await page.getByRole('button', { name: 'Submit' }).click();
-    await expect(page.getByText(SUCCESS_MESSAGE).first()).toBeVisible();
+    await expect(contactPage.successMessage.first()).toBeVisible();
   });
 
-  test('submit the form with a file attached', async ({ page }) => {
-    await page.getByPlaceholder('Name', { exact: true }).fill('Test User');
-    await page.getByPlaceholder('Email', { exact: true }).fill('test.user@example.com');
-    await page.getByPlaceholder('Subject').fill('Screenshot of the issue');
-    await page.getByPlaceholder('Your Message Here').fill('Please see the attached file.');
+  test('submit the form with a file attached', async () => {
+    await contactPage.fillForm(validContact());
+    await contactPage.attachFile('tests/fixtures/sample-attachment.txt');
+    await contactPage.submit();
 
-    // The upload input has no label or placeholder, so this is the one CSS selector in the suite.
-    await page.locator('input[type="file"]').setInputFiles('tests/fixtures/sample-attachment.txt');
-
-    page.on('dialog', dialog => {
-      dialog.accept()
-    });
-    await page.getByRole('button', { name: 'Submit' }).click();
-
-    await expect(page.getByText(SUCCESS_MESSAGE).first()).toBeVisible();
+    await expect(contactPage.successMessage.first()).toBeVisible();
   });
-
 });
