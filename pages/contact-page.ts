@@ -42,7 +42,9 @@ export class ContactPage {
     this.fileInput = page.locator('input[type="file"]');
     this.submitButton = page.getByRole('button', { name: 'Submit' });
 
-    // The site renders the message twice, so tests use the first one.
+    // The page's HTML contains this text twice (only one copy is visible), so this
+    // locator matches 2 elements. Tests that check visibility use .first() to avoid
+    // Playwright's strict mode error.
     this.successMessage = page.getByText(SUCCESS_TEXT);
   }
 
