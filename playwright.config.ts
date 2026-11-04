@@ -15,11 +15,30 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
 
-  // Stage 1 runs on Chromium only. Firefox, WebKit and mobile come in a later stage.
+  // Every test runs once per project: three desktop browser engines and two phones.
+  // Run a single one with: npx playwright test --project=firefox
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
+    // Mobile: a phone-sized screen, touch and a mobile user agent.
+    // Pixel runs in Chromium, iPhone runs in WebKit (the engine behind Safari).
+    {
+      name: 'mobile-chrome',
+      use: { ...devices['Pixel 7'] },
+    },
+    {
+      name: 'mobile-safari',
+      use: { ...devices['iPhone 15'] },
     },
   ],
 });

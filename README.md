@@ -14,7 +14,7 @@ Requires [Node.js](https://nodejs.org) 20.19 or newer.
 
 ```bash
 npm install
-npx playwright install chromium
+npx playwright install
 npx playwright test
 ```
 
@@ -31,6 +31,19 @@ Other useful commands:
 | `npm run test:headed` | Runs the tests with a visible browser |
 | `npm run test:ui` | Opens Playwright's interactive UI mode |
 | `npm run typecheck` | Checks the TypeScript without running tests |
+| `npx playwright test --project=firefox` | Runs the tests in one browser only |
+
+## Browsers and devices
+
+Every test runs in five Playwright projects, set up in `playwright.config.ts`. The tests themselves don't change.
+
+| Project | Browser engine | Device |
+| --- | --- | --- |
+| `chromium` | Chromium | Desktop Chrome |
+| `firefox` | Firefox | Desktop Firefox |
+| `webkit` | WebKit | Desktop Safari |
+| `mobile-chrome` | Chromium | Pixel 7 |
+| `mobile-safari` | WebKit | iPhone 15 |
 
 ## Project structure
 
@@ -79,7 +92,7 @@ The repo grows in small stages, one or more commits each:
 1. **Basics** (done): Playwright + TypeScript, happy-path tests.
 2. **Edge cases** (done): empty required field, invalid email, very long input, special characters.
 3. **Page Object Model** (done): move locators into page classes and test data into its own file.
-4. **Cross-browser**: Firefox, WebKit and a mobile viewport.
+4. **Cross-browser** (done): Chromium, Firefox, WebKit, plus Pixel and iPhone mobile emulation.
 5. **Accessibility**: `@axe-core/playwright` scans of the form pages.
 6. **CI**: GitHub Actions on every push, with the HTML report uploaded and a status badge here.
 7. **API tests**: a few tests with Playwright's `request` against a public practice API.
