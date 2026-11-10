@@ -1,0 +1,54 @@
+name: Playwright Tests
+
+# When the workflow runs: on every push and pull request to main,
+# and by hand from the Actions tab ("Run workflow" button).
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    # Stop the job if it hangs, so it doesn't use up free minutes.
+    timeout-minutes: 60
+    # A fresh Linux machine provided by GitHub.
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Download the repo code onto the machine.
+      - uses: actions/checkout@v7
+
+      # 2. Install Node.js (the latest LTS, which is newer than the 20.19 that Faker needs).
+      #    cache: npm keeps downloaded packages between runs, so installs are faster.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: npm
+
+      # 3. Install the exact package versions from package-lock.json.
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Check the TypeScript compiles before spending time on browsers.
+      - name: Type check
+        run: npm run typecheck
+
+      # 5. Download Chromium, Firefox and WebKit plus the Linux libraries they need.
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      # 6. Run every test in all five projects.
+      #    GitHub sets CI=true, so the config turns on 2 retries and forbidOnly.
+      - name: Run Playwright tests
+        run: npx playwright test
+
+      # 7. Save the HTML report, even when tests fail (that's when you need it most).
+      #    Download it from the run's Summary page, under "Artifacts".
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30

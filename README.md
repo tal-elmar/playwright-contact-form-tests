@@ -1,5 +1,7 @@
 # Playwright Form Tests
 
+[![Playwright Tests](https://github.com/tal-elmar/playwright-contact-form-tests/actions/workflows/playwright.yml/badge.svg)](https://github.com/tal-elmar/playwright-contact-form-tests/actions/workflows/playwright.yml)
+
 End-to-end tests for web contact form, written in TypeScript with [Playwright](https://playwright.dev).
 
 ## Background
@@ -45,10 +47,16 @@ Every test runs in five Playwright projects, set up in `playwright.config.ts`. T
 | `mobile-chrome` | Chromium | Pixel 7 |
 | `mobile-safari` | WebKit | iPhone 15 |
 
+## Continuous integration
+
+`.github/workflows/playwright.yml` runs the whole suite on GitHub Actions on every push and pull request to `main`. It can also be started by hand from the **Actions** tab. On CI each failing test is retried up to 2 times, because the public practice site is sometimes slow. The HTML report is saved as a downloadable artifact on every run.
+
 ## Project structure
 
 ```
 playwright-form-tests/
+├── .github/workflows/
+│   └── playwright.yml                    # GitHub Actions: runs the tests on every push
 ├── pages/
 │   └── contact-page.ts                   # page object: locators and actions for the form
 ├── test-data/
@@ -93,8 +101,8 @@ The repo grows in small stages, one or more commits each:
 2. **Edge cases** (done): empty required field, invalid email, very long input, special characters.
 3. **Page Object Model** (done): move locators into page classes and test data into its own file.
 4. **Cross-browser** (done): Chromium, Firefox, WebKit, plus Pixel and iPhone mobile emulation.
-5. **Accessibility**: `@axe-core/playwright` scans of the form pages.
-6. **CI**: GitHub Actions on every push, with the HTML report uploaded and a status badge here.
+5. **CI** (done): GitHub Actions runs the suite on every push and pull request, uploads the HTML report and shows the status badge at the top.
+6. **Accessibility**: `@axe-core/playwright` scans of the form pages.
 7. **API tests**: a few tests with Playwright's `request` against a public practice API.
 
 ## What I'd add next
