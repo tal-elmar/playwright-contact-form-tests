@@ -88,6 +88,7 @@ playwright-form-tests/
 - **Test data in its own file.** Valid data is random on every run, made with [Faker](https://fakerjs.dev), and emails always use the test domain `example.com`. Invalid emails and special-character strings are fixed, so a failure is easy to reproduce.
 - Locators use Playwright's user-facing queries (`getByRole`, `getByPlaceholder`) instead of fragile CSS paths.
 - Browser validation messages ("Please fill out this field") are not page text, so those tests read the field's validity state with `checkValidity()`.
+- The site shows Google ads, and on phone screens a sticky ad banner can cover the Submit button. `ContactPage.open()` blocks ad requests with `page.route`, so the ads never load.
 - The site shows a cookie consent overlay that can block clicks. A locator handler (`page.addLocatorHandler`), set up in `ContactPage.open()`, clicks "Consent" whenever it gets in the way.
 - Repeated cases (invalid emails) are generated from a list with a `for` loop, so each one is a separate test in the report.
 - No hard waits. Playwright waits automatically, and `expect` assertions retry until the page is ready.

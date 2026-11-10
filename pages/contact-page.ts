@@ -49,6 +49,11 @@ export class ContactPage {
   }
 
   async open() {
+    // The site shows Google ads. On a phone-sized screen a sticky ad banner can sit
+    // on top of the Submit button and block the click, so ad requests are cancelled
+    // before the page loads. The form itself doesn't need them.
+    await this.page.route(/googlesyndication\.com|doubleclick\.net/, (route) => route.abort());
+
     // The tested site shows a cookie consent overlay that blocks clicks. This handler runs
     // whenever the overlay appears, and does nothing if it never shows up.
     await this.page.addLocatorHandler(
